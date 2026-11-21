@@ -555,6 +555,11 @@ export default function UsersPage() {
     return Object.values(p).filter(Boolean).length;
   };
 
+  const totalPermissionsCount = permissionCategories.reduce(
+    (acc, cat) => acc + cat.items.length,
+    0
+  );
+
   return (
     <AppShell
       breadcrumbs={[
@@ -567,7 +572,7 @@ export default function UsersPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <ShieldCheck className="w-7 h-7 text-primary" />
+              <ShieldCheck className="w-7 h-7 text-brand" />
               الموظفون وإدارة الصلاحيات الشاملة
             </h1>
             <p className="text-sm text-gray-500 mt-1">
@@ -600,8 +605,9 @@ export default function UsersPage() {
             </div>
 
             <Button
+              variant="default"
               onClick={handleOpenCreate}
-              className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white shadow-sm"
+              className="flex items-center gap-2"
             >
               <PlusCircle className="w-5 h-5" />
               <span>إضافة موظف جديد</span>
@@ -652,7 +658,7 @@ export default function UsersPage() {
                   placeholder="بحث باسم الموظف، الهاتف، الرقم القومي، أو المسمى الوظيفي..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:border-brand focus:ring-1 focus:ring-brand"
                 />
               </div>
 
@@ -661,7 +667,7 @@ export default function UsersPage() {
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-primary bg-white min-w-[150px]"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-brand bg-white min-w-[150px]"
                 >
                   <option value="ALL">جميع الأدوار الوظيفية</option>
                   <option value="ADMIN">مدير عام النظام</option>
@@ -673,7 +679,7 @@ export default function UsersPage() {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-primary bg-white min-w-[120px]"
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-hidden focus:border-brand bg-white min-w-[120px]"
                 >
                   <option value="ALL">جميع الحالات</option>
                   <option value="ACTIVE">نشط فقط</option>
@@ -745,11 +751,11 @@ export default function UsersPage() {
                           <td className="py-3.5 px-4">
                             <button
                               onClick={() => handleOpenPermissions(user)}
-                              className="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline bg-primary/5 hover:bg-primary/10 px-2.5 py-1 rounded-lg transition-colors border border-primary/20"
+                              className="inline-flex items-center gap-1.5 text-xs text-brand-dark font-bold hover:underline bg-brand-soft hover:bg-[#ffe7d5] px-2.5 py-1 rounded-lg transition-colors border border-[#ffe2ce]"
                               title="اضغط لتعديل صلاحيات هذا الموظف بالتفصيل"
                             >
-                              <Sliders className="w-3.5 h-3.5" />
-                              <span>{countActivePermissions(user.permissions)} من 21 صلاحية</span>
+                              <Sliders className="w-3.5 h-3.5 text-brand" />
+                              <span>{countActivePermissions(user.permissions)} من {totalPermissionsCount} صلاحية</span>
                             </button>
                           </td>
                           <td className="py-3.5 px-4">
@@ -774,7 +780,7 @@ export default function UsersPage() {
                               <button
                                 title="تعديل الصلاحيات التفصيلية"
                                 onClick={() => handleOpenPermissions(user)}
-                                className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+                                className="p-1.5 rounded-lg text-brand hover:bg-brand-soft transition-colors"
                               >
                                 <Key className="w-4 h-4" />
                               </button>
@@ -894,7 +900,7 @@ export default function UsersPage() {
           <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-primary" />
+                <ShieldCheck className="w-5 h-5 text-brand" />
                 <h3 className="font-bold text-gray-900 text-lg">
                   {editingUserId ? "تعديل بيانات الموظف" : "إضافة موظف جديد للمنظومة"}
                 </h3>
@@ -921,7 +927,7 @@ export default function UsersPage() {
                   placeholder="مثال: م/ محمود إبراهيم النجار"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand"
                 />
               </div>
 
@@ -937,7 +943,7 @@ export default function UsersPage() {
                     placeholder="010XXXXXXXX"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary"
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand"
                   />
                 </div>
 
@@ -951,7 +957,7 @@ export default function UsersPage() {
                     placeholder="14 رقم قومي"
                     value={formData.national_id}
                     onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary"
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand"
                   />
                 </div>
               </div>
@@ -966,7 +972,7 @@ export default function UsersPage() {
                     onChange={(e) =>
                       setFormData({ ...formData, role_code: e.target.value as any })
                     }
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary bg-white"
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand bg-white"
                   >
                     <option value="ADMIN">مدير عام النظام</option>
                     <option value="ACCOUNTANT">مدير الحسابات والمالية</option>
@@ -984,7 +990,7 @@ export default function UsersPage() {
                     type="text"
                     value={formData.branch_name}
                     onChange={(e) => setFormData({ ...formData, branch_name: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary"
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand"
                   />
                 </div>
               </div>
@@ -1002,7 +1008,7 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, max_discount_pct: Number(e.target.value) })
                   }
-                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary font-mono"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-brand font-mono"
                 />
                 <span className="text-[11px] text-gray-400 mt-1 block">
                   إذا تجاوز الكاشير هذه النسبة، يطلب السيستم موافقة وتوقيع مدير الحسابات إلكترونياً.
@@ -1038,7 +1044,7 @@ export default function UsersPage() {
                               });
                             }
                           }}
-                          className="w-4 h-4 text-primary rounded-sm border-gray-300"
+                          className="w-4 h-4 text-brand rounded-sm border-gray-300 focus:ring-brand"
                         />
                         <span>{whName}</span>
                       </label>
@@ -1058,7 +1064,7 @@ export default function UsersPage() {
                 >
                   إلغاء
                 </Button>
-                <Button type="submit" className="bg-primary hover:bg-primary-hover text-white">
+                <Button type="submit" variant="default">
                   {editingUserId ? "حفظ التعديلات" : "إضافة الموظف"}
                 </Button>
               </div>
@@ -1075,13 +1081,13 @@ export default function UsersPage() {
             <div className="p-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <Key className="w-5 h-5 text-primary" />
+                  <Key className="w-5 h-5 text-brand" />
                   <h3 className="font-bold text-gray-900 text-lg">
                     تخصيص صلاحيات الموظف: {permTargetUser.full_name}
                   </h3>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  الوظيفة: {permTargetUser.role_name_ar} | مفعل حالياً {countActivePermissions(tempPermissions)} من أصل 21 صلاحية
+                  الوظيفة: {permTargetUser.role_name_ar} | مفعل حالياً {countActivePermissions(tempPermissions)} من أصل {totalPermissionsCount} صلاحية
                 </p>
               </div>
 
@@ -1131,7 +1137,7 @@ export default function UsersPage() {
               {permissionCategories.map((cat, catIdx) => (
                 <div key={catIdx} className="space-y-2">
                   <h4 className="text-xs font-bold text-gray-900 border-b pb-1 flex items-center gap-1.5">
-                    <Shield className="w-3.5 h-3.5 text-primary" />
+                    <Shield className="w-3.5 h-3.5 text-brand" />
                     <span>{cat.category}</span>
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1143,13 +1149,13 @@ export default function UsersPage() {
                           onClick={() => handleToggleSinglePermission(item.key)}
                           className={`p-3 rounded-xl border cursor-pointer transition-all flex items-start gap-3 ${
                             isGranted
-                              ? "bg-primary/5 border-primary/30 text-gray-900"
+                              ? "bg-brand-soft/70 border-brand/40 text-gray-900 shadow-xs"
                               : "bg-gray-50/50 border-gray-200 text-gray-500 hover:bg-gray-100/60"
                           }`}
                         >
                           <div className="mt-0.5">
                             {isGranted ? (
-                              <CheckSquare className="w-4 h-4 text-primary" />
+                              <CheckSquare className="w-4 h-4 text-brand" />
                             ) : (
                               <Square className="w-4 h-4 text-gray-300" />
                             )}
@@ -1183,7 +1189,12 @@ export default function UsersPage() {
                 >
                   إلغاء
                 </Button>
-                <Button onClick={handleSavePermissions} className="bg-primary hover:bg-primary-hover text-white">
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={handleSavePermissions}
+                  className="px-6 py-2 shadow-accent text-white"
+                >
                   حفظ الصلاحيات المخصصة
                 </Button>
               </div>
