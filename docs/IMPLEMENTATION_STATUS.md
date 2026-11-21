@@ -63,3 +63,4 @@
 6. **نتائج الاختبارات والبناء (المرحلة 13):**
    * اجتياز 18 اختبار وحدة مؤتمتة في Vitest بنسبة نجاح 100% (تغطي التكلفة، الوحدات، التسعير، تعقيم الـ Excel، المرتجعات، وهامش الاستبدال).
    * نجاح كامل لـ `pnpm run build` في Next.js وتوليد 23 مساراً بنسبة 100% بدون أي تحذيرات أو أخطاء برمجية.
+   * **إصلاح مشكلة ENOENT (21 نوفمبر 2026):** حُلت مشكلة `Cannot find module './604.js'` في dev server وخطأ `_not-found/page.js.nft.json` في مرحلة build traces عبر: (1) إضافة `src/app/not-found.tsx` كصفحة 404 عربية مخصصة، (2) إضافة `outputFileTracingRoot` في `next.config.ts` لحل مسارات Windows في Node File Tracer. تم التحقق من نجاح البناء الكامل (exit code 0) واستمرار اجتياز 18/18 اختبار. الـ dev server يعمل على http://localhost:3000 بشكل سليم.
