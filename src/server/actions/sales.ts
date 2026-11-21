@@ -25,7 +25,7 @@ const CreateSalesInvoiceSchema = z.object({
   lines: z.array(SalesLineItemSchema).min(1, "يجب إضافة بند واحد على الأقل في الفاتورة"),
 });
 
-export type CreateSalesInvoiceInput = z.infer<typeof CreateSalesInvoiceSchema>;
+export type CreateSalesInvoiceInput = z.input<typeof CreateSalesInvoiceSchema>;
 
 /**
  * Creates a draft sales invoice with re-calculated totals on the server.
