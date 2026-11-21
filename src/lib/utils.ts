@@ -9,6 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Formats a raw number with decimal places
+ */
+export function formatNumber(val: number, decimals = 2, locale = "ar-EG"): string {
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  }).format(val);
+}
+
+/**
  * Formats a currency amount in EGP with proper Arabic numerals or English numbers
  */
 export function formatCurrency(amount: number, locale = "ar-EG"): string {

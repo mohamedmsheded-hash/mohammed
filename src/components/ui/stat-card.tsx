@@ -6,7 +6,8 @@ interface StatCardProps {
   value: string | number;
   unit?: string;
   subtitle?: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | React.ComponentType<{ className?: string }>;
+  color?: "primary" | "success" | "warning" | "neutral" | string;
   trend?: {
     value: string;
     isPositive: boolean;
@@ -20,9 +21,28 @@ export function StatCard({
   unit,
   subtitle,
   icon,
+  color,
   trend,
   className,
 }: StatCardProps) {
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) return icon;
+    if (typeof icon === "function" || (typeof icon === "object" && icon !== null)) {
+      const IconComponent = icon as React.ComponentType<{ className?: string }>;
+      const colorClass =
+        color === "primary"
+          ? "text-brand"
+          : color === "success"
+          ? "text-status-green"
+          : color === "warning"
+          ? "text-amber-500"
+          : "text-muted/80";
+      return <IconComponent className={cn("w-5 h-5", colorClass)} />;
+    }
+    return null;
+  };
+
   return (
     <div
       className={cn(
@@ -32,7 +52,7 @@ export function StatCard({
     >
       <div className="flex items-center justify-between text-muted text-xs font-semibold mb-2">
         <span>{title}</span>
-        {icon && <div className="text-muted/80">{icon}</div>}
+        {icon && <div className="text-muted/80">{renderIcon()}</div>}
       </div>
       <div className="flex items-baseline gap-1.5 text-xl font-extrabold text-foreground tracking-tight">
         <span>{value}</span>
