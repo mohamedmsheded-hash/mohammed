@@ -197,9 +197,9 @@ export default function ExpensesPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold">القيد المحاسبي للفصل بين مصاريف البضاعة والمصاريف التشغيلية:</span>
+            <span className="font-bold">فصل مصاريف البضاعة عن المصاريف العمومية:</span>
             <p className="leading-relaxed">
-              مصاريف الشحن والنولون والعتالة الخاصة بشحنات الشراء والتوريد تُسجل في شاشة المشتريات وتُحمل آلياً على تكلفة الوحدة (Landed Costs)، بينما هذه الشاشة مخصصة فقط للمصروفات الإدارية والتشغيلية العامة التي لا تؤثر في تكلفة شراء الصنف.
+              النولون والعتالة بتتسجل مع شحنة المشتريات وتتحسب على تكلفة الصنف مباشرة، أما هنا بتسجل بس المصاريف العمومية والإدارية (صيانة، بوفيه، إيجارات، كهرباء) اللي مابتخشش في تكلفة البضاعة.
             </p>
           </div>
         </div>

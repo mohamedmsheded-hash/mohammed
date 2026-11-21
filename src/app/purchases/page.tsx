@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
+  Printer,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/ui/stat-card";
@@ -104,7 +105,7 @@ export default function PurchasesPage() {
             أذون استلام المشتريات وتكاليف التوريد
           </h1>
           <p className="text-muted text-xs mt-1">
-            تسجيل شحنات التوريد من المصانع، فحص أوزان الميزان البسكول، وتوزيع النولون والعتالة على طبقات FIFO.
+            تسجيل شحنات التوريد من المصانع، فحص أوزان الميزان البسكول، وتوزيع النولون والعتالة على تكلفة الوحدة.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -154,11 +155,11 @@ export default function PurchasesPage() {
         <div className="flex items-center gap-2 text-muted">
           <CheckCircle2 className="w-4 h-4 text-status-green" />
           <span>
-            محرك تكلفة الاستلام (Landed Costs): يتم احتساب تكلفة الطن أو الشيكارة الشاملة (سعر الشراء + النولون + العتالة) فورياً، وتوليد طبقة تكلفة FIFO جديدة برقم الإذن.
+            تكلفة كل شحنة بتتحسب شاملة (سعر الشراء + النولون + العتالة) وبتتسجل فوراً كطبقة جديدة في المخزن — الوارد أولاً يصرف أولاً.
           </span>
         </div>
         <span className="text-brand font-bold text-[11px] bg-brand-soft px-2.5 py-1 rounded-full">
-          FIFO Active ✓
+          الوارد أولاً يصرف أولاً ✓
         </span>
       </div>
 
@@ -193,6 +194,7 @@ export default function PurchasesPage() {
                 <th className="py-3 px-4 font-bold">النولون والعتالة</th>
                 <th className="py-3 px-4 font-bold">التكلفة الشاملة للطبقة</th>
                 <th className="py-3 px-4 font-bold text-center">الحالة</th>
+                <th className="py-3 px-4 font-bold text-center">طباعة</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -222,6 +224,15 @@ export default function PurchasesPage() {
                       label={rcpt.status === "VERIFIED" ? "تم التحقق ومطابقة الميزان" : "قيد الاستلام"}
                       variant={rcpt.status === "VERIFIED" ? "green" : "blue"}
                     />
+                  </td>
+                  <td className="py-3.5 px-4 text-center">
+                    <button
+                      onClick={() => window.print()}
+                      className="inline-flex items-center gap-1 text-[11px] text-gray-600 hover:text-brand font-medium px-2 py-1 rounded-lg hover:bg-brand-soft transition-colors"
+                    >
+                      <Printer className="w-3.5 h-3.5" />
+                      طباعة
+                    </button>
                   </td>
                 </tr>
               ))}

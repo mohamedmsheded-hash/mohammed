@@ -179,10 +179,10 @@ export default function ReportsPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <BarChart3 className="w-7 h-7 text-primary" />
-              التقارير المالية والرقابية وهوامش أرباح مواد البناء
+              التقارير المالية وهوامش أرباح مواد البناء
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              تحليل تكلفة المبيعات التاريخية (COGS)، أعمار الديون، وهامش الاستبدال لحماية رأس المال
+              متابعة تكلفة البضاعة المباعة، أرباح المبيعات، أعمار ديون العملاء، ومقارنة أسعار إعادة الشراء من المصنع
             </p>
           </div>
 
@@ -219,7 +219,7 @@ export default function ReportsPage() {
             }`}
           >
             <TrendingUp className="w-4 h-4" />
-            <span>تكلفة المبيعات وهوامش الأرباح (COGS)</span>
+            <span>تكلفة المبيعات وأرباح الأصناف</span>
           </button>
 
           <button
@@ -231,7 +231,7 @@ export default function ReportsPage() {
             }`}
           >
             <Scale className="w-4 h-4" />
-            <span>هامش الاستبدال وإعادة الشراء (Replacement Margin)</span>
+            <span>هامش إعادة الشراء وسعر السوق اليوم</span>
           </button>
 
           <button
@@ -259,16 +259,16 @@ export default function ReportsPage() {
                 color="primary"
               />
               <StatCard
-                title="تكلفة البضاعة المباعة (COGS)"
+                title="تكلفة البضاعة المباعة"
                 value={formatCurrency(totalCogs)}
-                subtitle="طبقات FIFO مقفلة تاريخياً"
+                subtitle="محسوبة من أصل تكلفة الشراء والنولون"
                 icon={Boxes}
                 color="neutral"
               />
               <StatCard
                 title="مجمل الربح الإجمالي"
                 value={formatCurrency(totalProfit)}
-                subtitle="فارق البيع عن تكلفة الشراء"
+                subtitle="فارق سعر البيع عن تكلفة البضاعة"
                 icon={TrendingUp}
                 color="success"
               />
@@ -284,10 +284,10 @@ export default function ReportsPage() {
             <div className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden">
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="font-bold text-gray-900 text-sm">
-                  تحليل الربحية حسب قطاعات مواد البناء (الأرباح التاريخية المقفلة)
+                  تحليل الربحية حسب قطاعات مواد البناء (الأرباح المحققة)
                 </h3>
                 <span className="text-xs text-gray-500">
-                  مبني على طبقات FIFO المخصصة لحظة الاعتماد الذري
+                  محسوب بدقة بناءً على تكلفة الشراء والنولون لكل شحنة
                 </span>
               </div>
 
@@ -297,7 +297,7 @@ export default function ReportsPage() {
                     <tr>
                       <th className="py-3 px-4">قطاع المواد</th>
                       <th className="py-3 px-4">إجمالي الإيرادات</th>
-                      <th className="py-3 px-4">تكلفة البضاعة (COGS)</th>
+                      <th className="py-3 px-4">تكلفة البضاعة المباعة</th>
                       <th className="py-3 px-4">الربح الإجمالي (EGP)</th>
                       <th className="py-3 px-4">نسبة الهامش %</th>
                       <th className="py-3 px-4">مؤشر الربحية</th>
@@ -345,11 +345,10 @@ export default function ReportsPage() {
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="space-y-1">
                 <span className="font-bold text-sm">
-                  أهمية هامش الاستبدال (Replacement Margin) في تجارة مواد البناء:
+                  ليه مهم تتابع سعر إعادة الشراء من المصنع أول بأول؟
                 </span>
                 <p className="leading-relaxed">
-                  عند حدوث قفزات مفاجئة في أسعار مصانع الحديد والأسمنت، قد يظهر النظام أرباحاً محاسبية دفترية ممتازة بناءً على طبقات FIFO القديمة، ولكن عند إعادة ملء المخزن بسعر المصنع الجديد تجد المنشأة نفسها تخسر سيولتها النقدية!
-                  هذا الجدول يوضح الفرق الدقيق بين الربح الدفتري وهامش الاستبدال الفعلي اليوم.
+                  لو سعر طن الحديد أو الأسمنت زاد فجأة في المصنع، ممكن تبيع بسعر يظهر لك ربح دفتري على الورق، بس لما تيجي تشتري بضاعة مكانها بسعر المصنع الجديد تلاقي فلوسك نقصت! الجدول ده بيحسب لك الفرق في لحظته عشان تضمن إنك مسعر صح ورأس مالك في أمان.
                 </p>
               </div>
             </div>
@@ -361,10 +360,10 @@ export default function ReportsPage() {
                     <tr>
                       <th className="py-3 px-4">الصنف والوحدة</th>
                       <th className="py-3 px-4">سعر البيع الحالي</th>
-                      <th className="py-3 px-4">تكلفة FIFO الدفترية</th>
+                      <th className="py-3 px-4">تكلفة الشراء الدفترية</th>
                       <th className="py-3 px-4">الربح المحاسبي الدفتري</th>
-                      <th className="py-3 px-4">تكلفة الاستبدال بالمصنع اليوم</th>
-                      <th className="py-3 px-4">هامش الاستبدال الحقيقي</th>
+                      <th className="py-3 px-4">تكلفة إعادة الشراء من المصنع اليوم</th>
+                      <th className="py-3 px-4">هامش الربح الحقيقي لإعادة الشراء</th>
                       <th className="py-3 px-4">حالة التسعير والمخاطرة</th>
                     </tr>
                   </thead>

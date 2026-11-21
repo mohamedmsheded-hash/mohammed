@@ -188,11 +188,11 @@ export default function ReturnsPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900 flex items-start gap-3">
           <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold">القيد المحاسبي الإلزامي (Historical Cost & Scrap Segregation):</span>
+            <span className="font-bold">قاعدة المرتجعات الثابتة:</span>
             <p className="leading-relaxed">
-              1. يعاد إدراج البضاعة المرتجعة بنفس التكلفة التاريخية التي خرجت بها من طبقة FIFO يوم البيع، ولا تتأثر أبداً بأسعار السوق اليوم.
+              1. البضاعة المرتجعة بترجع للمخزن بنفس تكلفتها اللي اتباعت بيها — مش بسعر النهارده.
               <br />
-              2. البضاعة التالفة أو المعيبة يتم توجيهها إجبارياً إلى مخزن التوالف (WH-SCRAP) ولا تدخل في رصيد المتاح للبيع إطلاقاً.
+              2. البضاعة التالفة أو المعيبة بتروح إجبارياً لمخزن التوالف ومش بتدخل في رصيد البيع خالص.
             </p>
           </div>
         </div>

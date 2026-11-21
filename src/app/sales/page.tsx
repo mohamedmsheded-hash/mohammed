@@ -211,9 +211,9 @@ export default function SalesPage() {
         <ShieldCheck className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
         <div className="text-foreground leading-relaxed">
           <strong className="text-brand-dark block font-bold mb-0.5">
-            ثبات الفواتير التاريخية:
+            ثبات تكلفة وأرباح الفواتير السابقة:
           </strong>
-          كل فاتورة معتمدة تسجل سعر البيع وتكلفة البضاعة المباعة (COGS) المخصصة للبند كـ Snapshot غير قابل للتعديل. تغير أسعار مواد البناء الحالية لا يؤثر على هوامش ربح فواتير الماضي.
+          كل فاتورة معتمدة بتسجل سعر البيع وتكلفة البضاعة في لحظتها وبتقفل عليها تماماً. حتى لو أسعار الحديد أو الأسمنت زادت في السوق بعد كده، ربح وتكلفة الفواتير القديمة بيفضلوا ثابتين ومبيغيروش حساباتك بأثر رجعي.
         </div>
       </div>
 
@@ -330,10 +330,12 @@ export default function SalesPage() {
                           <span>{approvingId === inv.id ? "جارٍ..." : "اعتماد"}</span>
                         </Button>
                       )}
-                      <Button variant="secondary" size="sm" onClick={() => window.print()}>
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>طباعة</span>
-                      </Button>
+                      <Link href={`/sales/${inv.id}`}>
+                        <Button variant="secondary" size="sm" title="عرض وطباعة الفاتورة">
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>عرض الفاتورة</span>
+                        </Button>
+                      </Link>
                     </div>
                   </td>
                 </tr>

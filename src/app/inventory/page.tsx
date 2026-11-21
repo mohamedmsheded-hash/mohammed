@@ -328,7 +328,7 @@ export default function InventoryPage() {
         <StatCard
           title="إجمالي قيمة المخزون الدفتري"
           value={formatCurrency(1465120)}
-          subtitle="محسوبة وفق طبقات FIFO"
+          subtitle="محسوبة من أصل تكلفة الشراء والنولون"
           icon={<Boxes className="w-5 h-5 text-brand" />}
         />
         <StatCard

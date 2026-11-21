@@ -283,10 +283,10 @@ export default function SettingsPage() {
           <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-6">
             <div>
               <h3 className="text-base font-bold text-gray-900">
-                القيود والقواعد المحاسبية والمخزنية الإلزامية (System Invariants)
+                الضوابط المحاسبية وقواعد المخازن الصارمة
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                تطبق هذه السياسات على مستوى دوال قاعدة البيانات الذرية (PostgreSQL RPCs) ولا يمكن تجاوزها
+                قواعد ثابتة مطبقة على مستوى النظام وقاعدة البيانات مباشرة لمنع أي تجاوزات أو أخطاء
               </p>
             </div>
 
@@ -297,11 +297,11 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <Lock className="w-4 h-4 text-primary" />
                     <span className="text-sm font-bold text-gray-900">
-                      سياسة المخزون السالب (Strict Negative Stock Prevention)
+                      منع الصرف بالسالب (حماية أرصدة المخازن)
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed max-w-2xl">
-                    منع اعتماد أي فاتورة مبيعات أو إذن صرف إذا كانت الكمية المطلوبة تتجاوز الرصيد الفعلي المتوفر في طبقات المخزون (FIFO) بالمستودع المحدد.
+                    منع اعتماد أي فاتورة بيع أو إذن صرف لو الكمية المطلوبة أكبر من الرصيد الفعلي المتوفر بالمخزن.
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -325,15 +325,15 @@ export default function SettingsPage() {
                   <div className="flex items-center gap-2">
                     <ShieldCheck className="w-4 h-4 text-emerald-600" />
                     <span className="text-sm font-bold text-gray-900">
-                      طريقة احتساب تكلفة المخزون (Inventory Valuation Method)
+                      طريقة احتساب تكلفة المخزون
                     </span>
                   </div>
                   <p className="text-xs text-gray-600 leading-relaxed max-w-2xl">
-                    الوارد أولاً يصرف أولاً (FIFO) مع الاحتفاظ الفردي بكل طبقة شراء ونولونها وتثبيت التكلفة التاريخية للفواتير المعتمدة بصفة نهائية.
+                    الوارد أولاً يصرف أولاً: كل شحنة بتتسجل بتكلفتها ونولونها، والبضاعة الأقدم بتتصرف أولاً مع تثبيت تكلفة الفواتير المعتمدة نهائياً.
                   </p>
                 </div>
-                <span className="text-xs font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-lg">
-                  FIFO (الوارد أولاً يصرف أولاً)
+                <span className="text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 px-3 py-1 rounded-lg">
+                  الوارد أولاً يصرف أولاً
                 </span>
               </div>
 
@@ -372,10 +372,10 @@ export default function SettingsPage() {
           <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
             <div>
               <h3 className="text-base font-bold text-gray-900">
-                تسلسل وترقيم المستندات الذري (Atomic Document Sequences)
+                تسلسل وترقيم المستندات التلقائي
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
-                توليد متسلسل للأرقام يمنع الفجوات والازدواج حتى في أوقات الذروة المتزامنة
+                توليد متسلسل للأرقام يمنع الفجوات والازدواج حتى في أوقات الذروة وضغط الفواتير
               </p>
             </div>
 

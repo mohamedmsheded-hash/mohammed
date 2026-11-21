@@ -15,6 +15,9 @@ import {
   X,
   Percent,
   Check,
+  Edit2,
+  UserX,
+  UserCheck,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/ui/stat-card";
@@ -99,14 +102,14 @@ const initialUsers: UserProfileRow[] = [
 
 const permissionsMatrix = [
   { module: "دليل المنتجات والتسعير", admin: true, acct: true, wh: false, cashier: false },
-  { module: "اعتماد فواتير المبيعات (ACID)", admin: true, acct: true, wh: false, cashier: true },
+  { module: "اعتماد فواتير المبيعات", admin: true, acct: true, wh: false, cashier: true },
   { module: "اعتماد أذونات استلام البضاعة والنولون", admin: true, acct: true, wh: true, cashier: false },
   { module: "صرف المخزون والتحويل بين المستودعات", admin: true, acct: false, wh: true, cashier: false },
   { module: "إدارة الخزينة وسندات القبض والصرف", admin: true, acct: true, wh: false, cashier: true },
   { module: "تسجيل المرتجعات وتوجيه التوالف", admin: true, acct: true, wh: true, cashier: false },
   { module: "مركز Excel والاستيراد الآمن", admin: true, acct: true, wh: false, cashier: false },
   { module: "التقارير المالية وهوامش الأرباح", admin: true, acct: true, wh: false, cashier: false },
-  { module: "إدارة المستخدمين وسياسات الأمان RLS", admin: true, acct: false, wh: false, cashier: false },
+  { module: "إدارة الموظفين والصلاحيات", admin: true, acct: false, wh: false, cashier: false },
 ];
 
 export default function UsersPage() {
@@ -114,7 +117,14 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"USERS" | "PERMISSIONS">("USERS");
+
+  const handleToggleActive = (userId: string) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, is_active: !u.is_active } : u))
+    );
+  };
 
   const [formData, setFormData] = useState({
     full_name: "",
@@ -123,6 +133,30 @@ export default function UsersPage() {
     max_discount_pct: 0,
     warehouses: [] as string[],
   });
+
+  const handleOpenCreate = () => {
+    setEditingUserId(null);
+    setFormData({
+      full_name: "",
+      phone: "",
+      role_code: "CASHIER",
+      max_discount_pct: 0,
+      warehouses: ["مخزن الأسمنت والجبس المغطى"],
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEdit = (user: UserProfileRow) => {
+    setEditingUserId(user.id);
+    setFormData({
+      full_name: user.full_name,
+      phone: user.phone,
+      role_code: user.role_code,
+      max_discount_pct: user.max_discount_pct,
+      warehouses: user.warehouses,
+    });
+    setIsModalOpen(true);
+  };
 
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -148,7 +182,7 @@ export default function UsersPage() {
     }
   };
 
-  const handleCreateUser = (e: React.FormEvent) => {
+  const handleSaveUser = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.full_name || !formData.phone) {
       alert("برجاء إدخال الاسم ورقم الهاتف");
@@ -163,38 +197,53 @@ export default function UsersPage() {
       STAFF: "موظف عام",
     };
 
-    const newUser: UserProfileRow = {
-      id: `usr-${Date.now()}`,
-      full_name: formData.full_name,
-      phone: formData.phone,
-      role_code: formData.role_code,
-      role_name_ar: roleMap[formData.role_code] || "موظف",
-      branch_name: "الفرع الرئيسي - المنطقة الصناعية",
-      warehouses:
-        formData.warehouses.length > 0
-          ? formData.warehouses
-          : ["مخزن الأسمنت والجبس المغطى"],
-      max_discount_pct: formData.max_discount_pct,
-      is_active: true,
-      created_at: new Date().toISOString().split("T")[0],
-    };
+    if (editingUserId) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === editingUserId
+            ? {
+                ...u,
+                full_name: formData.full_name,
+                phone: formData.phone,
+                role_code: formData.role_code,
+                role_name_ar: roleMap[formData.role_code] || u.role_name_ar,
+                max_discount_pct: formData.max_discount_pct,
+                warehouses:
+                  formData.warehouses.length > 0
+                    ? formData.warehouses
+                    : u.warehouses,
+              }
+            : u
+        )
+      );
+    } else {
+      const newUser: UserProfileRow = {
+        id: `usr-${Date.now()}`,
+        full_name: formData.full_name,
+        phone: formData.phone,
+        role_code: formData.role_code,
+        role_name_ar: roleMap[formData.role_code] || "موظف",
+        branch_name: "الفرع الرئيسي - المنطقة الصناعية",
+        warehouses:
+          formData.warehouses.length > 0
+            ? formData.warehouses
+            : ["مخزن الأسمنت والجبس المغطى"],
+        max_discount_pct: formData.max_discount_pct,
+        is_active: true,
+        created_at: new Date().toISOString().split("T")[0],
+      };
+      setUsers([newUser, ...users]);
+    }
 
-    setUsers([newUser, ...users]);
     setIsModalOpen(false);
-    setFormData({
-      full_name: "",
-      phone: "",
-      role_code: "CASHIER",
-      max_discount_pct: 0,
-      warehouses: [],
-    });
+    setEditingUserId(null);
   };
 
   return (
     <AppShell
       breadcrumbs={[
         { label: "الرئيسية", href: "/" },
-        { label: "المستخدمون والصلاحيات" },
+        { label: "الموظفون والصلاحيات" },
       ]}
     >
       <div className="space-y-6">
@@ -203,10 +252,10 @@ export default function UsersPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <ShieldCheck className="w-7 h-7 text-primary" />
-              إدارة المستخدمين والصلاحيات الدقيقة وعزل المخازن (IAM & RLS)
+              الموظفون وإدارة الصلاحيات
             </h1>
             <p className="text-sm text-gray-500 mt-1">
-              تحديد أدوار الموظفين، تقييد صلاحيات المخازن، ضبط سقف الخصم التجاري، وتطبيق سياسات RLS
+              إضافة الموظفين وتحديد أدوارهم والمخازن المسموح لكل واحد منهم بالصرف منها وسقف الخصم
             </p>
           </div>
 
@@ -235,11 +284,11 @@ export default function UsersPage() {
             </div>
 
             <Button
-              onClick={() => setIsModalOpen(true)}
+              onClick={handleOpenCreate}
               className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white shadow-sm"
             >
               <PlusCircle className="w-5 h-5" />
-              <span>إضافة مستخدم جديد</span>
+              <span>إضافة موظف جديد</span>
             </Button>
           </div>
         </div>
@@ -316,10 +365,11 @@ export default function UsersPage() {
                       <th className="py-3 px-4">اسم الموظف وبيانات الاتصال</th>
                       <th className="py-3 px-4">الدور الوظيفي والصلاحية</th>
                       <th className="py-3 px-4">الفرع المخصص</th>
-                      <th className="py-3 px-4">المخازن المسموح بالصرف منها (RLS Scope)</th>
+                      <th className="py-3 px-4">المخازن المسموح بها</th>
                       <th className="py-3 px-4">أقصى نسبة خصم</th>
                       <th className="py-3 px-4">الحالة</th>
                       <th className="py-3 px-4">تاريخ الانضمام</th>
+                      <th className="py-3 px-4 text-center">إجراءات</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -360,13 +410,31 @@ export default function UsersPage() {
                           {user.max_discount_pct > 0 ? `${user.max_discount_pct}%` : "0% (ممنوع)"}
                         </td>
                         <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3" />
-                            نشط
+                          <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${user.is_active ? "text-emerald-700 bg-emerald-50 border-emerald-200" : "text-gray-500 bg-gray-100 border-gray-200"}`}>
+                            {user.is_active ? <CheckCircle2 className="w-3 h-3" /> : <AlertCircle className="w-3 h-3" />}
+                            {user.is_active ? "نشط" : "موقوف"}
                           </span>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-gray-400 text-[11px]">
                           {user.created_at}
+                        </td>
+                        <td className="py-3.5 px-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              title="تعديل بيانات الموظف"
+                              onClick={() => handleOpenEdit(user)}
+                              className="p-1.5 rounded-lg text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              title={user.is_active ? "تعطيل الحساب" : "تفعيل الحساب"}
+                              onClick={() => handleToggleActive(user.id)}
+                              className={`p-1.5 rounded-lg transition-colors ${user.is_active ? "text-gray-500 hover:bg-red-50 hover:text-red-600" : "text-gray-500 hover:bg-green-50 hover:text-green-600"}`}
+                            >
+                              {user.is_active ? <UserX className="w-3.5 h-3.5" /> : <UserCheck className="w-3.5 h-3.5" />}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -380,10 +448,10 @@ export default function UsersPage() {
           <div className="bg-white rounded-xl border border-gray-200 shadow-xs p-6 space-y-4">
             <div>
               <h2 className="text-base font-bold text-gray-900">
-                مصفوفة الصلاحيات حسب الأدوار الوظيفية (Role-Based Access Control)
+                مصفوفة الصلاحيات حسب الأدوار الوظيفية
               </h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                تُترجم هذه الصلاحيات تلقائياً إلى سياسات RLS في PostgreSQL لمنع أي وصول غير مرخص
+                الصلاحيات دي مطبقة على مستوى قاعدة البيانات مباشرة — مفيش موظف يقدر يعدي حدوده حتى لو جرب
               </p>
             </div>
 
@@ -448,17 +516,22 @@ export default function UsersPage() {
             <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-gray-50/50">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-primary" />
-                <h3 className="font-bold text-gray-900 text-lg">إضافة مستخدم جديد للنظام</h3>
+                <h3 className="font-bold text-gray-900 text-lg">
+                  {editingUserId ? "تعديل بيانات وصلاحيات الموظف" : "إضافة موظف جديد للنظام"}
+                </h3>
               </div>
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setEditingUserId(null);
+                }}
                 className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+            <form onSubmit={handleSaveUser} className="p-6 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   الاسم بالكامل *
@@ -500,10 +573,10 @@ export default function UsersPage() {
                     }
                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary bg-white"
                   >
-                    <option value="ADMIN">مدير النظام (Admin)</option>
-                    <option value="ACCOUNTANT">محاسب مالي (Accountant)</option>
-                    <option value="WAREHOUSE_KEEPER">أمين مخزن (Warehouse Keeper)</option>
-                    <option value="CASHIER">كاشير ونقطة بيع (Cashier)</option>
+                    <option value="ADMIN">مدير عام النظام</option>
+                    <option value="ACCOUNTANT">محاسب مالي</option>
+                    <option value="WAREHOUSE_KEEPER">أمين مخزن</option>
+                    <option value="CASHIER">كاشير ومسؤول مبيعات</option>
                   </select>
                 </div>
               </div>
@@ -530,7 +603,7 @@ export default function UsersPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  المخازن المسموح بالصرف والاستلام منها (Warehouse Scoping)
+                  المخازن المسموح بالصرف والاستلام منها
                 </label>
                 <div className="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50/50 text-xs">
                   <label className="flex items-center gap-2 text-gray-800">
@@ -563,12 +636,15 @@ export default function UsersPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setIsModalOpen(false);
+                    setEditingUserId(null);
+                  }}
                 >
                   إلغاء
                 </Button>
                 <Button type="submit" className="bg-primary hover:bg-primary-hover text-white">
-                  إنشاء حساب المستخدم
+                  {editingUserId ? "حفظ التعديلات" : "إضافة الموظف"}
                 </Button>
               </div>
             </form>

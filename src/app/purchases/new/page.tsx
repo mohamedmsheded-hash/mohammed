@@ -188,7 +188,7 @@ export default function NewGoodsReceiptPage() {
       });
 
       alert(
-        `تم تسجيل إذن الاستلام (${result.receiptNumber}) وتوليد طبقات تكلفة الـ FIFO الشاملة لمصاريف النقل والعتالة بنجاح.`
+        `تم تسجيل إذن الاستلام (${result.receiptNumber}) وحساب تكلفة البضاعة شاملة النولون والعتالة وإضافتها للمخزن بنجاح.`
       );
       router.push("/purchases");
     } catch (err: any) {
@@ -213,7 +213,7 @@ export default function NewGoodsReceiptPage() {
               تسجيل إذن استلام بضاعة ومصاريف التوريد
             </h1>
             <p className="text-muted text-xs">
-              مطابقة أوزان البسكول، توزيع النولون والعتالة، وإنشاء طبقات تكلفة FIFO للمخزن.
+              مطابقة أوزان البسكول، توزيع النولون والعتالة، وإضافة رصيد البضاعة للمخزن بتكلفتها الفعلية.
             </p>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function NewGoodsReceiptPage() {
           <div className="bg-surface border border-border rounded-card p-5 shadow-card">
             <h2 className="text-sm font-extrabold text-foreground mb-4 pb-2 border-b border-border flex items-center gap-2">
               <Layers className="w-4 h-4 text-brand" />
-              <span>مصاريف التوريد والنولون (Landed Costs)</span>
+              <span>مصاريف التوريد والنولون والعتالة</span>
             </h2>
 
             <div className="space-y-3 text-xs">
@@ -499,7 +499,7 @@ export default function NewGoodsReceiptPage() {
 
                 <div className="pt-2 border-t border-border flex items-center justify-between text-sm">
                   <strong className="font-extrabold text-foreground">
-                    إجمالي تكلفة طبقة الـ FIFO
+                    إجمالي تكلفة الشحنة الشاملة
                   </strong>
                   <strong className="font-extrabold text-brand text-base">
                     {formatCurrency(totalLandedCost)}

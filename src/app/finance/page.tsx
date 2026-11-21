@@ -249,7 +249,7 @@ export default function FinancePage() {
             إدارة الخزائن والحسابات النقدية والبنكية
           </h1>
           <p className="text-muted text-xs mt-1">
-            سندات القبض والصرف، دفتر الأستاذ النقدي التراكمي (Append-Only)، ومطابقة الورديات اليومية.
+            سندات القبض والصرف، ومتابعة حركات النقدية اليومية، وجرد ومطابقة رصيد الخزينة.
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -301,9 +301,9 @@ export default function FinancePage() {
         <CheckCircle2 className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
         <div className="text-foreground leading-relaxed">
           <strong className="text-brand-dark block font-bold mb-0.5">
-            النزاهة المالية ودفتر الأستاذ غير القابل للتعديل:
+            انضباط حركة النقدية والخزائن:
           </strong>
-          كل حركة قبض أو صرف تسجل فورياً في جدول `cash_movements` وترتبط بمستند رسمي (سند قبض، سند صرف، أو فاتورة). لا يمكن تعديل أو مسح حركة نقدية سابقة؛ والتسوية بسند عكسي معتمد فقط.
+          كل حركة قبض أو صرف بتتسجل فوراً برقم سند رسمي. ممنوع مسح أو تعديل أي حركة سابقة لضمان مطابقة رصيد الدرج الفعلي مع الدفاتر، وأي تسوية بتتم بسند تسوية أو قيد عكسي معتمد.
         </div>
       </div>
 
@@ -312,7 +312,7 @@ export default function FinancePage() {
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-border">
           <div>
             <h2 className="text-sm font-extrabold text-foreground">
-              دفتر حركات الخزينة التراكمي (Cash Movements Ledger)
+              سجل حركات الخزينة والبنك
             </h2>
             <p className="text-[11px] text-muted">
               سجل تفصيلي بكافة المقبوضات والمدفوعات والمطابقات اليومية

@@ -229,11 +229,11 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2 text-muted">
           <History className="w-4 h-4 text-brand" />
           <span>
-            سجل الأسعار التاريخي: أي تعديل في سعر البيع أو تكلفة الاستبدال يسجل آلياً ولا يغير أي فاتورة قديمة معتمدة.
+            سجل الأسعار: أي تغيير في سعر البيع أو سعر المصنع بيتسجل تلقائياً ومبيأثرش على أي فواتير قديمة اتباعت.
           </span>
         </div>
         <span className="text-status-green font-bold text-[11px] bg-status-green-bg px-2.5 py-1 rounded-full">
-          المحرك نشط ✓
+          تسجيل تلقائي ✓
         </span>
       </div>
 

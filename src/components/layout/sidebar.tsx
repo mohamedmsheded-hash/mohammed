@@ -49,7 +49,7 @@ export const navItems: NavItem[] = [
   { id: "expenses", label: "المصروفات", href: "/expenses", icon: CreditCard },
   { id: "reports", label: "التقارير والتحليلات", href: "/reports", icon: BarChart3 },
   { id: "excel", label: "مركز Excel", href: "/excel", icon: FileUp, badge: "مهم" },
-  { id: "users", label: "المستخدمون والصلاحيات", href: "/users", icon: ShieldCheck },
+  { id: "users", label: "الموظفون والصلاحيات", href: "/users", icon: ShieldCheck },
   { id: "archive", label: "الأرشيف التاريخي", href: "/archive", icon: Archive },
   { id: "activity", label: "سجل النشاط والتدقيق", href: "/activity", icon: History },
   { id: "settings", label: "الإعدادات والنسخ الاحتياطي", href: "/settings", icon: Settings },
@@ -139,7 +139,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         {/* Operational Guard Footer Note */}
         <div className="mt-8 mx-1 p-3 bg-white/5 border border-white/10 rounded-xl text-[#b9c3d0] text-[10px] leading-relaxed">
           <b className="text-white block mb-1">الضابط المحاسبي:</b>
-          تغير أسعار اليوم لا يغير فواتير الماضي. التكاليف التاريخية محمية ومقفلة.
+          تغير أسعار النهاردة مبيغيرش فواتير امبارح. التكاليف والأرباح القديمة مقفولة وثابتة.
         </div>
       </aside>
     </>

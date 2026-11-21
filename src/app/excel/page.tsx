@@ -109,7 +109,7 @@ export default function ExcelCenterPage() {
             مركز معالجة ملفات Excel الآمن
           </h1>
           <p className="text-muted text-xs mt-1">
-            استيراد وتحديث البيانات عبر معالج خماسي المراحل، فحص ومعاينة (Dry Run)، وحماية كاملة من Formula Injection.
+            استيراد وتحديث البيانات، فحص ومعاينة مسبقة للملف، والتأكد من صحة وسلامة البيانات قبل حفظها.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -125,9 +125,9 @@ export default function ExcelCenterPage() {
         <ShieldCheck className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
         <div className="text-foreground leading-relaxed">
           <strong className="text-brand-dark block font-bold mb-0.5">
-            المبدأ الحاكم لمركز Excel (Rule 15 & 16):
+            ضوابط الاستيراد الآمن:
           </strong>
-          لا يتم حفظ أو استيراد أي صف مباشرة إلى بيانات التشغيل دون مطابقة الأعمدة، كشف التكرار، تشغيل المحاكاة التجريبية (Dry Run)، ثم التأكيد الصريح. التعقيم المسبق يمنع أي ثغرات برمجية من ملفات المستخدم.
+          مفيش أي بيانات بتنزل على السيستم مباشرة إلا بعد مطابقة الأعمدة، كشف التكرار، وعرض معاينة تجريبية للأصناف عشان تراجعها وتعتمدها بنفسك بدون أي أخطاء.
         </div>
       </div>
 
@@ -222,7 +222,7 @@ export default function ExcelCenterPage() {
                   disabled={isProcessing}
                 >
                   <Play className="w-4 h-4" />
-                  <span>{isProcessing ? "جارٍ فحص الملف..." : "تشغيل المحاكاة التجريبية (Dry Run)"}</span>
+                  <span>{isProcessing ? "جارٍ فحص الملف..." : "فحص ومعاينة البيانات"}</span>
                 </Button>
               </div>
             )}
@@ -234,7 +234,7 @@ export default function ExcelCenterPage() {
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
                   <h3 className="text-sm font-extrabold text-foreground">
-                    نتائج المحاكاة التجريبية (Dry Run Summary)
+                    نتيجة فحص ومعاينة الملف قبل الحفظ
                   </h3>
                   <p className="text-[11px] text-muted">
                     فحص الصفوف، التأكد من عدم تكرار الأكواد، ومطابقة وحدات القياس.
@@ -411,7 +411,7 @@ export default function ExcelCenterPage() {
               <h3 className="text-sm font-extrabold text-foreground">قالب الأرصدة الافتتاحية</h3>
             </div>
             <p className="text-xs text-muted leading-relaxed">
-              تسجيل رصيد بداية المدة لكل مخزن مع تكلفة شراء الوحدة لتوليد طبقات تكلفة الـ FIFO الافتتاحية.
+              تسجيل رصيد بداية المدة لكل مخزن مع تكلفة شراء الوحدة لحساب تكلفة المخزون بدقة من أول يوم.
             </p>
             <Button variant="secondary" size="sm" className="w-full">
               <Download className="w-3.5 h-3.5" />

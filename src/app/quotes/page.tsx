@@ -213,9 +213,9 @@ export default function QuotesPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-xs text-blue-900 flex items-start gap-3">
           <Lock className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold">قاعدة حجز المخزون الصارمة (Stock Reservation Invariant):</span>
+            <span className="font-bold">قاعدة حجز البضاعة في المخزن:</span>
             <p className="leading-relaxed">
-              عند اختيار &quot;حجز البضاعة بالمخزن&quot;، يتم احتساب الكمية ضمن (المخزون المحجوز) ويقل (المتاح للبيع) تلقائياً، دون أي صرف فعلي من طبقات التكلفة FIFO إلا بعد اعتماد الفاتورة النهائية رسمياً. إذا انتهت صلاحية العرض، يُفرج النظام عن المخزون آلياً.
+              لما تختار &quot;حجز البضاعة بالمخزن&quot;، الكمية بتتحسب فوراً كـ (بضاعة محجوزة) والرصيد المتاح للبيع بيقل تلقائياً عشان متتبعش لعميل تاني، بس مبتتصرفش فعلياً من المخزن ولا بتتسجل مبيعات إلا لما تعتمد الفاتورة رسمياً. ولو مدة العرض انتهت من غير بيع، البضاعة بترجع متاحة للبيع لوحدها.
             </p>
           </div>
         </div>

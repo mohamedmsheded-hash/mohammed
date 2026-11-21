@@ -44,10 +44,10 @@ const initialAuditLogs: AuditLogRow[] = [
     user_role: "مدير الحسابات",
     ip_address: "192.168.1.45",
     action: "APPROVE",
-    action_label_ar: "اعتماد ذري لفاتورة مبيعات",
+    action_label_ar: "اعتماد فاتورة مبيعات",
     entity_name: "sales_invoices",
     entity_id: "inv-2026-0042",
-    summary: "اعتماد الفاتورة INV-2026-0042 بقيمة 428,500 ج.م وقفل COGS بمبلغ 412,000 ج.م",
+    summary: "اعتماد الفاتورة INV-2026-0042 بقيمة 428,500 ج.م وتثبيت تكلفة البضاعة بمبلغ 412,000 ج.م",
     old_values: { status: "DRAFT", historical_cogs: 0 },
     new_values: {
       status: "APPROVED",
@@ -193,10 +193,10 @@ export default function ActivityPage() {
           <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
             <span className="font-bold text-sm text-white">
-              قاعدة الأمان الصارمة لسجلات التدقيق (WORM Compliance):
+              السجل محمي ولا يُمس:
             </span>
             <p className="text-slate-300 leading-relaxed">
-              جدول `audit_logs` محمي بسياسة RLS على مستوى PostgreSQL تمنع أي أمر `UPDATE` أو `DELETE` حتى من قِبل مدراء النظام. كل تغيير في سعر أو اعتماد مالي أو تسوية يتم التقاطه فورياً مع بصمة المستخدم وعنوان الـ IP.
+              كل حاجة بتحصل في السيستم بتتسجل هنا بشكل نهائي — مفيش حذف ولا تعديل حتى من المدير. كل تغيير في سعر أو اعتماد أو تسوية بيتسجل مع اسم المستخدم وعنوان IP تبعته.
             </p>
           </div>
         </div>
@@ -211,9 +211,9 @@ export default function ActivityPage() {
             color="primary"
           />
           <StatCard
-            title="اعتمادات مالية وذريّة"
+            title="فواتير ومعاملات معتمدة"
             value={logs.filter((l) => l.action === "APPROVE").length}
-            subtitle="قفل تكلفة وترحيل محاسبي"
+            subtitle="ترحيل محاسبي وتثبيت تكلفة"
             icon={Lock}
             color="success"
           />

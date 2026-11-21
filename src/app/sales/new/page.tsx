@@ -546,9 +546,9 @@ export default function NewSalesInvoicePage() {
           {/* Operational Guard Reminder */}
           <div className="p-4 bg-brand-soft border border-[#ffe2ce] rounded-card text-xs text-foreground leading-relaxed">
             <strong className="text-brand-dark block font-bold mb-1">
-              تنفيذ ذري وآمن (Atomic Transaction):
+              اعتماد فوري ومباشر:
             </strong>
-            عند الضغط على «اعتماد وصرف المخزون»، تنفذ قاعدة البيانات عملية متكاملة تخصم المخزون، وتثبت طبقات تكلفة الـ FIFO، وتوثق السعر والتكلفة التاريخيين دون أي إمكانية للتعارض أو التلاعب.
+            أول ما تدوس على «اعتماد وصرف المخزون»، السيستم بيخصم الكميات من المخزن فوراً ويثبت سعر البيع وتكلفة البضاعة في لحظتها ويقيد الحسابات بدون أي تضارب.
           </div>
         </div>
       </div>

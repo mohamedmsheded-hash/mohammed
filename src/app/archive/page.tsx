@@ -74,10 +74,10 @@ const archivedRecords: ArchivedDocument[] = [
         description: "تسجيل كميات وأسعار البيع المتفق عليها بخصم معتمد 0%",
       },
       {
-        title: "الاعتماد الذري وقفل التكلفة (ACID Approval)",
+        title: "اعتماد الفاتورة وتثبيت التكلفة الفعلية",
         timestamp: "2026-11-21 09:32:00",
         user: "أحمد عبد الله (مدير الحسابات)",
-        description: "خصم طبقات FIFO لمستودع الحديد وقفل COGS بمبلغ 412,000 ج.م وتسجيل أثر مديونية العميل",
+        description: "خصم الكميات من أقدم رصيد متوفر بالمستودع وتثبيت تكلفة البضاعة بمبلغ 412,000 ج.م وتسجيل أثر مديونية العميل",
       },
       {
         title: "إصدار أمر التوصيل وجدولة الشاحنة",
@@ -126,7 +126,7 @@ const archivedRecords: ArchivedDocument[] = [
         title: "توزيع النولون والعتالة واعتماد التوريد",
         timestamp: "2026-11-20 08:00:00",
         user: "أحمد عبد الله (مدير الحسابات)",
-        description: "تحميل نولون 5,000 ج.م وتوليد طبقة FIFO جديدة بتكلفة 130 ج.م للشيكارة",
+        description: "تحميل نولون 5,000 ج.م وتسجيل رصيد وارد جديد بتكلفة 130 ج.م للشيكارة",
       },
     ],
     lines: [
@@ -193,10 +193,10 @@ export default function ArchivePage() {
           <ShieldCheck className="w-6 h-6 text-emerald-400 shrink-0 mt-0.5" />
           <div className="text-xs space-y-1">
             <span className="font-bold text-sm text-white">
-              مبدأ الحفظ الأرشيفي غير القابل للتعديل (WORM - Write Once, Read Many):
+              أرشيف تاريخي دائم غير قابل للتعديل أو الحذف:
             </span>
             <p className="text-slate-300 leading-relaxed">
-              جميع الفواتير وأذونات الصرف والاستلام المعتمدة يتم توليد بصمة تجزئة مشفرة لها (SHA-256) وقت الاعتماد وتُحفظ مع بياناتها التاريخية والمرفقات بجدول زمني لا يقل عن 10 سنوات امتثالاً للقوانين الضريبية والرقابية.
+              جميع الفواتير وأذونات الصرف والاستلام المعتمدة يتم حفظها تلقائياً مع بصمة تأكيد مشفرة وبياناتها التاريخية والمرفقات ومسار حركتها الكامل، لضمان حفظ حقوق المنشأة ومطابقة السجلات الضريبية.
             </p>
           </div>
         </div>
@@ -321,8 +321,8 @@ export default function ArchivePage() {
                 <div>
                   <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
                     <span>مستند أرشيفي مقفل: {selectedDoc.doc_number}</span>
-                    <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-mono font-bold">
-                      WORM LOCKED
+                    <span className="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-bold">
+                      مقفل نهائياً
                     </span>
                   </h3>
                   <span className="text-xs text-gray-500 font-mono">
@@ -379,7 +379,7 @@ export default function ArchivePage() {
                         <th className="py-2.5 px-3">الصنف</th>
                         <th className="py-2.5 px-3">الكمية المسجلة</th>
                         <th className="py-2.5 px-3">سعر الوحدة</th>
-                        <th className="py-2.5 px-3">تكلفة الوحدة (FIFO)</th>
+                        <th className="py-2.5 px-3">تكلفة الوحدة المحسوبة</th>
                         <th className="py-2.5 px-3">الإجمالي</th>
                       </tr>
                     </thead>
