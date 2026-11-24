@@ -346,9 +346,9 @@ BEGIN
         -- Check previously scheduled deliveries for this line
         SELECT COALESCE(SUM(quantity_to_deliver), 0) INTO v_already_scheduled
         FROM delivery_order_lines dol
-        JOIN delivery_orders do ON do.id = dol.delivery_order_id
+        JOIN delivery_orders delivery_order ON delivery_order.id = dol.delivery_order_id
         WHERE dol.sales_invoice_line_id = v_inv_line.id
-          AND do.status != 'CANCELLED';
+          AND delivery_order.status != 'CANCELLED';
 
         IF (v_already_scheduled + v_qty_to_deliver) > v_inv_line.entered_quantity THEN
             RAISE EXCEPTION 'إجمالي كميات التوصيل المطلوبة تجاوز كمية الفاتورة الأصلية للصنف: %', v_inv_line.product_name_snap;

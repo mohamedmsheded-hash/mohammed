@@ -41,3 +41,6 @@ pnpm-debug.log*
 
 # Backups
 /backups/
+
+# Ignore .secret-stack folder
+.secret-stack
