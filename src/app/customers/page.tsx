@@ -29,6 +29,7 @@ interface CustomerRow {
   code: string;
   name: string;
   phone: string;
+  national_id?: string;
   address: string;
   current_balance: number;
   credit_limit: number;
@@ -53,6 +54,7 @@ const initialCustomers: CustomerRow[] = [
     code: "CUST-001",
     name: "شركة المعمار الحديث للمقاولات",
     phone: "01011223344",
+    national_id: "29803120123456",
     address: "التجمع الخامس - القاهرة الجديدة",
     current_balance: 328500,
     credit_limit: 500000,
@@ -65,6 +67,7 @@ const initialCustomers: CustomerRow[] = [
     code: "CUST-002",
     name: "مؤسسة الأمل للتشييد والتعمير",
     phone: "01122334455",
+    national_id: "29007152104567",
     address: "كورنيش المعادي - برج النيل",
     current_balance: 185000,
     credit_limit: 200000,
@@ -77,6 +80,7 @@ const initialCustomers: CustomerRow[] = [
     code: "CUST-003",
     name: "شركة الصفوة للاستثمار العقاري",
     phone: "01233445566",
+    national_id: "28510011234567",
     address: "مدينة الشروق - الحي الثاني",
     current_balance: 92000,
     credit_limit: 150000,
@@ -89,6 +93,7 @@ const initialCustomers: CustomerRow[] = [
     code: "CUST-004",
     name: "مقاولات المهندس سامح فخري",
     phone: "01555443322",
+    national_id: "29203191605432",
     address: "مدينة نصر - الحي السابع",
     current_balance: 145000,
     credit_limit: 100000, // Exceeded credit limit!
@@ -163,18 +168,37 @@ export default function CustomersPage() {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    national_id: "",
     address: "",
     credit_limit: 100000,
     tax_id: "",
     commercial_reg: "",
   });
 
-  const filteredCustomers = customers.filter(
-    (c) =>
-      c.name.includes(searchTerm) ||
-      c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      c.phone.includes(searchTerm)
-  );
+  const normalizeSearchNumber = (value: string) =>
+    value
+      .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+      .replace(/[^0-9]/g, "");
+
+  const numericSearch = normalizeSearchNumber(searchTerm);
+  const filteredCustomers = customers.filter((customer) => {
+    const textMatches =
+      customer.name.includes(searchTerm.trim()) ||
+      customer.code.toLowerCase().includes(searchTerm.trim().toLowerCase());
+
+    const numberMatches =
+      numericSearch.length > 0 &&
+      [
+        customer.phone,
+        customer.national_id,
+        customer.tax_id,
+        customer.commercial_reg,
+      ].some((value) =>
+        normalizeSearchNumber(value || "").includes(numericSearch)
+      );
+
+    return textMatches || numberMatches;
+  });
 
   const totalReceivables = customers.reduce((sum, c) => sum + c.current_balance, 0);
   const exceededCreditCount = customers.filter((c) => c.current_balance > c.credit_limit).length;
@@ -191,6 +215,7 @@ export default function CustomersPage() {
       code: `CUST-00${customers.length + 5}`,
       name: formData.name,
       phone: formData.phone,
+      national_id: formData.national_id || undefined,
       address: formData.address,
       current_balance: 0,
       credit_limit: Number(formData.credit_limit) || 50000,
@@ -204,6 +229,7 @@ export default function CustomersPage() {
     setFormData({
       name: "",
       phone: "",
+      national_id: "",
       address: "",
       credit_limit: 100000,
       tax_id: "",
@@ -278,7 +304,7 @@ export default function CustomersPage() {
             <Search className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="بحث باسم العميل، الكود، أو رقم الهاتف..."
+              placeholder="بحث بالاسم، الكود، رقم الهاتف، البطاقة، أو الرقم الضريبي..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pr-9 pl-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-hidden focus:border-primary focus:ring-1 focus:ring-primary"
@@ -526,7 +552,7 @@ export default function CustomersPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     رقم الهاتف *
@@ -539,6 +565,21 @@ export default function CustomersPage() {
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    رقم البطاقة / الهوية
+                  </label>
+                  <input
+                    type="text"
+                    dir="ltr"
+                    inputMode="numeric"
+                    placeholder="14 رقمًا للقومي"
+                    value={formData.national_id}
+                    onChange={(e) => setFormData({ ...formData, national_id: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-hidden focus:border-primary font-mono"
                   />
                 </div>
 

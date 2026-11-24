@@ -76,10 +76,26 @@ interface FormLineItem {
   total: number;
 }
 
+const availableCustomers = [
+  {
+    id: "cust0000-0000-0000-0000-000000000001",
+    name: "شركة المعمار الحديث للمقاولات",
+    phone: "01011223344",
+    nationalId: "29803120123456",
+  },
+  {
+    id: "cust0000-0000-0000-0000-000000000002",
+    name: "مقاولات الشرق (المهندس عادل)",
+    phone: "01122334455",
+    nationalId: "29007152104567",
+  },
+];
+
 export default function NewSalesInvoicePage() {
   const router = useRouter();
   const [warehouseId, setWarehouseId] = useState("c0000000-0000-0000-0000-000000000001");
   const [customerId, setCustomerId] = useState("");
+  const [customerSearchTerm, setCustomerSearchTerm] = useState("");
   const [invoiceDate, setInvoiceDate] = useState("2026-11-21");
   const [paymentType, setPaymentType] = useState<"CASH" | "CREDIT">("CASH");
   const [freightCharge, setFreightCharge] = useState(0);
@@ -105,6 +121,22 @@ export default function NewSalesInvoicePage() {
   const subtotal = lines.reduce((sum, line) => sum + line.total, 0);
   const totalAmount = subtotal + freightCharge;
   const remainingBalance = Math.max(0, totalAmount - paidAmount);
+
+  const normalizeCustomerSearch = (value: string) =>
+    value
+      .replace(/[٠-٩]/g, (digit) => String("٠١٢٣٤٥٦٧٨٩".indexOf(digit)))
+      .replace(/[^0-9]/g, "");
+
+  const customerSearchNumber = normalizeCustomerSearch(customerSearchTerm);
+  const filteredCustomers = availableCustomers.filter((customer) => {
+    const textMatches =
+      customer.name.includes(customerSearchTerm.trim()) ||
+      customer.phone.includes(customerSearchTerm.trim());
+    const numberMatches =
+      customerSearchNumber.length > 0 &&
+      normalizeCustomerSearch(`${customer.phone}${customer.nationalId}`).includes(customerSearchNumber);
+    return !customerSearchTerm.trim() || textMatches || numberMatches;
+  });
 
   const handleProductChange = (key: string, newProdId: string) => {
     const prod = availableProducts.find((p) => p.id === newProdId);
@@ -293,22 +325,32 @@ export default function NewSalesInvoicePage() {
                   <User className="w-3.5 h-3.5 text-brand" />
                   <span>العميل / المقاول</span>
                 </label>
-                <select
-                  value={customerId}
-                  onChange={(e) => {
-                    setCustomerId(e.target.value);
-                    if (!e.target.value) setPaymentType("CASH");
-                  }}
-                  className="w-full bg-[#f8fafc] border border-border rounded-element p-2 text-xs font-bold text-foreground outline-none focus:border-brand"
-                >
-                  <option value="">عميل نقدي عام (سداد فوري)</option>
-                  <option value="cust0000-0000-0000-0000-000000000001">
-                    شركة المعمار الحديث للمقاولات
-                  </option>
-                  <option value="cust0000-0000-0000-0000-000000000002">
-                    مقاولات الشرق (المهندس عادل)
-                  </option>
-                </select>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    dir="ltr"
+                    inputMode="search"
+                    value={customerSearchTerm}
+                    onChange={(e) => setCustomerSearchTerm(e.target.value)}
+                    placeholder="بحث برقم الهاتف أو البطاقة"
+                    className="w-full bg-[#f8fafc] border border-border rounded-element p-2 text-xs text-foreground outline-none focus:border-brand"
+                  />
+                  <select
+                    value={customerId}
+                    onChange={(e) => {
+                      setCustomerId(e.target.value);
+                      if (!e.target.value) setPaymentType("CASH");
+                    }}
+                    className="w-full bg-[#f8fafc] border border-border rounded-element p-2 text-xs font-bold text-foreground outline-none focus:border-brand"
+                  >
+                    <option value="">عميل نقدي عام (سداد فوري)</option>
+                    {filteredCustomers.map((customer) => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.name} - {customer.phone}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
