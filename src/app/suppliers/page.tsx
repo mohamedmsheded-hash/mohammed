@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Building2,
   PlusCircle,
@@ -23,6 +23,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { saveSupplierAction, deactivateSupplierAction } from "@/server/actions/masters";
 
 interface SupplierRow {
   id: string;
@@ -146,6 +148,34 @@ export default function SuppliersPage() {
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [selectedSupplier, setSelectedSupplier] = useState<SupplierRow | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadSuppliers = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("suppliers")
+        .select("id, code, name_ar, supplier_type, phone, tax_id, commercial_reg, address, current_balance, is_active")
+        .order("name_ar");
+      if (!error && data) {
+        setSuppliers(data.map((row) => ({
+          id: row.id,
+          code: row.code,
+          name: row.name_ar,
+          supplier_type: row.supplier_type,
+          type_label_ar: row.supplier_type,
+          phone: row.phone,
+          address: row.address || "",
+          current_balance: Number(row.current_balance || 0),
+          tax_id: row.tax_id || undefined,
+          commercial_reg: row.commercial_reg || undefined,
+          is_active: row.is_active,
+        })));
+      }
+      setIsLoading(false);
+    };
+    loadSuppliers();
+  }, []);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -169,7 +199,7 @@ export default function SuppliersPage() {
 
   const totalPayables = suppliers.reduce((sum, s) => sum + s.current_balance, 0);
 
-  const handleCreateSupplier = (e: React.FormEvent) => {
+  const handleCreateSupplier = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       alert("برجاء إدخال اسم المصنع أو المورد ورقم الهاتف");
@@ -184,31 +214,43 @@ export default function SuppliersPage() {
       GENERAL: "مورد عام",
     };
 
-    const newSup: SupplierRow = {
-      id: `sup-${Date.now()}`,
-      code: formData.code || `SUP-00${suppliers.length + 5}`,
-      name: formData.name,
-      supplier_type: formData.supplier_type,
-      type_label_ar: typeLabels[formData.supplier_type] || "مورد",
-      phone: formData.phone,
-      address: formData.address,
-      current_balance: 0,
-      tax_id: formData.tax_id || undefined,
-      commercial_reg: formData.commercial_reg || undefined,
-      is_active: true,
-    };
-
-    setSuppliers([newSup, ...suppliers]);
-    setIsNewModalOpen(false);
-    setFormData({
-      code: "",
-      name: "",
-      supplier_type: "STEEL_MILL",
-      phone: "",
-      address: "",
-      tax_id: "",
-      commercial_reg: "",
-    });
+    try {
+      const result = await saveSupplierAction({
+        code: formData.code || `SUP-${String(suppliers.length + 1).padStart(3, "0")}`,
+        name_ar: formData.name,
+        supplier_type: formData.supplier_type,
+        phone: formData.phone,
+        address: formData.address || null,
+        tax_id: formData.tax_id || null,
+        commercial_reg: formData.commercial_reg || null,
+      });
+      const saved = result.supplier;
+      setSuppliers([{
+        id: saved.id,
+        code: saved.code,
+        name: saved.name_ar,
+        supplier_type: saved.supplier_type,
+        type_label_ar: typeLabels[saved.supplier_type] || "مورد",
+        phone: saved.phone,
+        address: saved.address || "",
+        current_balance: Number(saved.current_balance || 0),
+        tax_id: saved.tax_id || undefined,
+        commercial_reg: saved.commercial_reg || undefined,
+        is_active: saved.is_active,
+      }, ...suppliers]);
+      setIsNewModalOpen(false);
+      setFormData({
+        code: "",
+        name: "",
+        supplier_type: "STEEL_MILL",
+        phone: "",
+        address: "",
+        tax_id: "",
+        commercial_reg: "",
+      });
+    } catch (error: any) {
+      alert(error?.message || "فشل حفظ المورد");
+    }
   };
 
   return (

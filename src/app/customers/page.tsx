@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Users,
   PlusCircle,
@@ -23,6 +23,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { StatCard } from "@/components/ui/stat-card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { saveCustomerAction, deactivateCustomerAction } from "@/server/actions/masters";
 
 interface CustomerRow {
   id: string;
@@ -163,6 +165,34 @@ export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState<CustomerRow | null>(null);
   const [isNewModalOpen, setIsNewModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCustomers = async () => {
+      const supabase = createClient();
+      const { data, error } = await supabase
+        .from("customers")
+        .select("id, code, name_ar, phone, national_id, tax_id, commercial_reg, address, current_balance, credit_limit, is_active")
+        .order("name_ar");
+      if (!error && data) {
+        setCustomers(data.map((row) => ({
+          id: row.id,
+          code: row.code,
+          name: row.name_ar,
+          phone: row.phone,
+          national_id: row.national_id || undefined,
+          tax_id: row.tax_id || undefined,
+          commercial_reg: row.commercial_reg || undefined,
+          address: row.address || "",
+          current_balance: Number(row.current_balance || 0),
+          credit_limit: Number(row.credit_limit || 0),
+          is_active: row.is_active,
+        })));
+      }
+      setIsLoading(false);
+    };
+    loadCustomers();
+  }, []);
 
   // New customer form state
   const [formData, setFormData] = useState({
@@ -203,38 +233,51 @@ export default function CustomersPage() {
   const totalReceivables = customers.reduce((sum, c) => sum + c.current_balance, 0);
   const exceededCreditCount = customers.filter((c) => c.current_balance > c.credit_limit).length;
 
-  const handleCreateCustomer = (e: React.FormEvent) => {
+  const handleCreateCustomer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       alert("برجاء إدخال اسم العميل ورقم الهاتف");
       return;
     }
 
-    const newCust: CustomerRow = {
-      id: `cust-${Date.now()}`,
-      code: `CUST-00${customers.length + 5}`,
-      name: formData.name,
-      phone: formData.phone,
-      national_id: formData.national_id || undefined,
-      address: formData.address,
-      current_balance: 0,
-      credit_limit: Number(formData.credit_limit) || 50000,
-      tax_id: formData.tax_id || undefined,
-      commercial_reg: formData.commercial_reg || undefined,
-      is_active: true,
-    };
-
-    setCustomers([newCust, ...customers]);
-    setIsNewModalOpen(false);
-    setFormData({
-      name: "",
-      phone: "",
-      national_id: "",
-      address: "",
-      credit_limit: 100000,
-      tax_id: "",
-      commercial_reg: "",
-    });
+    try {
+      const result = await saveCustomerAction({
+        code: `CUST-${String(customers.length + 1).padStart(3, "0")}`,
+        name_ar: formData.name,
+        phone: formData.phone,
+        national_id: formData.national_id || null,
+        address: formData.address || null,
+        tax_id: formData.tax_id || null,
+        commercial_reg: formData.commercial_reg || null,
+        credit_limit: Number(formData.credit_limit) || 0,
+      });
+      const saved = result.customer;
+      setCustomers([{
+        id: saved.id,
+        code: saved.code,
+        name: saved.name_ar,
+        phone: saved.phone,
+        national_id: saved.national_id || undefined,
+        address: saved.address || "",
+        current_balance: Number(saved.current_balance || 0),
+        credit_limit: Number(saved.credit_limit || 0),
+        tax_id: saved.tax_id || undefined,
+        commercial_reg: saved.commercial_reg || undefined,
+        is_active: saved.is_active,
+      }, ...customers]);
+      setIsNewModalOpen(false);
+      setFormData({
+        name: "",
+        phone: "",
+        national_id: "",
+        address: "",
+        credit_limit: 100000,
+        tax_id: "",
+        commercial_reg: "",
+      });
+    } catch (error: any) {
+      alert(error?.message || "فشل حفظ العميل");
+    }
   };
 
   return (
