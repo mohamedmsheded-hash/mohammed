@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const ReceiptVoucherSchema = z.object({
@@ -12,7 +12,7 @@ const ReceiptVoucherSchema = z.object({
   amount: z.number().positive("المبلغ يجب أن يكون أكبر من الصفر"),
   payment_method: z.string().default("CASH"),
   notes: z.string().optional(),
-  received_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  received_by: z.string().uuid().optional(),
 });
 
 export type ReceiptVoucherInput = z.input<typeof ReceiptVoucherSchema>;
@@ -22,7 +22,11 @@ export type ReceiptVoucherInput = z.input<typeof ReceiptVoucherSchema>;
  */
 export async function createReceiptVoucherAction(input: ReceiptVoucherInput) {
   const validated = ReceiptVoucherSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن إنشاء سند لمؤسسة أخرى");
+  }
 
   // 1. Generate sequential receipt number
   const { data: nextNum } = await supabase.rpc("get_next_document_number", {
@@ -45,7 +49,7 @@ export async function createReceiptVoucherAction(input: ReceiptVoucherInput) {
       amount: validated.amount,
       payment_method: validated.payment_method,
       notes: validated.notes || null,
-      received_by: validated.received_by,
+      received_by: profile.id,
     })
     .select("id, receipt_number")
     .single();
@@ -63,7 +67,7 @@ export async function createReceiptVoucherAction(input: ReceiptVoucherInput) {
     source_doc_type: "RECEIPT_VOUCHER",
     source_doc_id: voucher.id,
     notes: validated.notes || `تحصيل عميل بسند رقم ${voucher.receipt_number}`,
-    created_by: validated.received_by,
+    created_by: profile.id,
   });
 
   if (movErr) throw new Error(`فشل تسجيل حركة الخزينة: ${movErr.message}`);
@@ -113,7 +117,7 @@ const PaymentVoucherSchema = z.object({
   amount: z.number().positive("المبلغ يجب أن يكون أكبر من الصفر"),
   payment_method: z.string().default("CASH"),
   notes: z.string().min(3, "بيان الصرف وملاحظات الدفع مطلوبة"),
-  paid_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  paid_by: z.string().uuid().optional(),
 });
 
 export type PaymentVoucherInput = z.input<typeof PaymentVoucherSchema>;
@@ -123,7 +127,11 @@ export type PaymentVoucherInput = z.input<typeof PaymentVoucherSchema>;
  */
 export async function createPaymentVoucherAction(input: PaymentVoucherInput) {
   const validated = PaymentVoucherSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن إنشاء سند لمؤسسة أخرى");
+  }
 
   // 1. Verify cashbox balance
   const { data: box } = await supabase
@@ -159,7 +167,7 @@ export async function createPaymentVoucherAction(input: PaymentVoucherInput) {
       amount: validated.amount,
       payment_method: validated.payment_method,
       notes: validated.notes,
-      paid_by: validated.paid_by,
+      paid_by: profile.id,
     })
     .select("id, payment_number")
     .single();
@@ -177,7 +185,7 @@ export async function createPaymentVoucherAction(input: PaymentVoucherInput) {
     source_doc_type: "PAYMENT_VOUCHER",
     source_doc_id: voucher.id,
     notes: validated.notes,
-    created_by: validated.paid_by,
+    created_by: profile.id,
   });
 
   // 5. Update Cashbox Balance
@@ -215,7 +223,7 @@ const CloseSessionSchema = z.object({
   expected_cash: z.number(),
   actual_cash_counted: z.number().min(0, "المبلغ الفعلي لا يمكن أن يكون سالباً"),
   notes: z.string().optional(),
-  closed_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  closed_by: z.string().uuid().optional(),
 });
 
 export type CloseSessionInput = z.input<typeof CloseSessionSchema>;
@@ -225,15 +233,19 @@ export type CloseSessionInput = z.input<typeof CloseSessionSchema>;
  */
 export async function closeCashSessionAction(input: CloseSessionInput) {
   const validated = CloseSessionSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن إغلاق وردية لمؤسسة أخرى");
+  }
 
   const { error } = await supabase.from("cash_sessions").insert({
     organization_id: validated.organization_id,
     cashbox_id: validated.cashbox_id,
-    opened_by: validated.closed_by,
+    opened_by: profile.id,
     opened_at: new Date(Date.now() - 28800000).toISOString(), // 8 hours ago
     opening_cash: validated.expected_cash,
-    closed_by: validated.closed_by,
+    closed_by: profile.id,
     closed_at: new Date().toISOString(),
     expected_cash: validated.expected_cash,
     actual_cash_counted: validated.actual_cash_counted,

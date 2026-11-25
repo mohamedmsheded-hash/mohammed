@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const PurchaseLineSchema = z.object({
@@ -31,7 +31,7 @@ const CreateGoodsReceiptSchema = z.object({
   notes: z.string().optional(),
   lines: z.array(PurchaseLineSchema).min(1, "يجب إضافة صنف واحد على الأقل في إذن الاستلام"),
   expenses: z.array(GoodsReceiptExpenseSchema).default([]),
-  received_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  received_by: z.string().uuid().optional(),
 });
 
 export type CreateGoodsReceiptInput = z.input<typeof CreateGoodsReceiptSchema>;
@@ -42,7 +42,7 @@ export type CreateGoodsReceiptInput = z.input<typeof CreateGoodsReceiptSchema>;
  */
 export async function createGoodsReceiptAction(input: CreateGoodsReceiptInput) {
   const validated = CreateGoodsReceiptSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
 
   // 1. Generate sequential receipt number
   const { data: nextNum } = await supabase.rpc("get_next_document_number", {
@@ -68,7 +68,7 @@ export async function createGoodsReceiptAction(input: CreateGoodsReceiptInput) {
       tare_weight_kg: validated.tare_weight_kg || null,
       net_weight_kg: validated.net_weight_kg || null,
       notes: validated.notes || null,
-      received_by: validated.received_by,
+      p_received_by: profile.id,
     })
     .select("id, receipt_number")
     .single();

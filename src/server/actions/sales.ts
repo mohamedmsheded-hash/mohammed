@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const SalesLineItemSchema = z.object({
@@ -32,7 +32,11 @@ export type CreateSalesInvoiceInput = z.input<typeof CreateSalesInvoiceSchema>;
  */
 export async function createSalesInvoiceDraft(input: CreateSalesInvoiceInput) {
   const validated = CreateSalesInvoiceSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن إنشاء فاتورة لمؤسسة أخرى");
+  }
 
   // 1. Fetch current product names & conversions to prevent client tampering
   const productIds = validated.lines.map((l) => l.product_id);
@@ -101,7 +105,7 @@ export async function createSalesInvoiceDraft(input: CreateSalesInvoiceInput) {
       total_amount: totalAmount,
       paid_amount: validated.paid_amount || 0,
       notes: validated.notes || null,
-      created_by: "00000000-0000-0000-0000-000000000000", // Current session user
+      created_by: profile.id,
     })
     .select("id, invoice_number")
     .single();
@@ -131,12 +135,12 @@ export async function createSalesInvoiceDraft(input: CreateSalesInvoiceInput) {
 /**
  * Approves a sales invoice atomically via PostgreSQL RPC.
  */
-export async function approveSalesInvoice(invoiceId: string, approvedByUserId: string) {
-  const supabase = await createClient();
+export async function approveSalesInvoice(invoiceId: string) {
+  const { supabase, profile } = await getAuthenticatedProfile();
 
   const { data, error } = await supabase.rpc("rpc_approve_sales_invoice", {
     p_invoice_id: invoiceId,
-    p_approved_by: approvedByUserId,
+    p_approved_by: profile.id,
   });
 
   if (error) {

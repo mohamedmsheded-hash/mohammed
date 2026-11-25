@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const UpdatePriceSchema = z.object({
@@ -9,7 +9,7 @@ const UpdatePriceSchema = z.object({
   priceType: z.enum(["SALE_PRICE", "REPLACEMENT_COST"]),
   newPrice: z.number().min(0, "السعر لا يمكن أن يكون سالباً"),
   reason: z.string().min(3, "يجب تحديد سبب تغيير السعر (مثال: زيادة أسعار المصنع)"),
-  userId: z.string().uuid().default("00000000-0000-0000-0000-000000000000"),
+  userId: z.string().uuid().optional(),
 });
 
 export type UpdatePriceInput = z.input<typeof UpdatePriceSchema>;
@@ -20,7 +20,7 @@ export type UpdatePriceInput = z.input<typeof UpdatePriceSchema>;
  */
 export async function updateProductPriceAction(input: UpdatePriceInput) {
   const validated = UpdatePriceSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
 
   // 1. Fetch current price
   const { data: product, error: fetchErr } = await supabase
@@ -45,7 +45,7 @@ export async function updateProductPriceAction(input: UpdatePriceInput) {
     old_price: oldPrice,
     new_price: validated.newPrice,
     reason: validated.reason,
-    changed_by: validated.userId,
+    changed_by: profile.id,
     effective_at: new Date().toISOString(),
   });
 
@@ -104,7 +104,11 @@ export type CreateProductInput = z.input<typeof CreateProductSchema>;
 
 export async function createProductAction(input: CreateProductInput) {
   const validated = CreateProductSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن إضافة صنف لمؤسسة أخرى");
+  }
 
   const { data, error } = await supabase
     .from("products")

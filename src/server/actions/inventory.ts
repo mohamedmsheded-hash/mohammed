@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const StockAdjustmentSchema = z.object({
@@ -11,7 +11,7 @@ const StockAdjustmentSchema = z.object({
   adjustment_type: z.enum(["ADD", "SUB"]),
   quantity: z.number().positive("الكمية يجب أن تكون أكبر من الصفر"),
   reason: z.string().min(3, "يجب كتابة سبب التسوية (تلف، عجز جردي، كسر، تسوية زيادة)"),
-  created_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  created_by: z.string().uuid().optional(),
 });
 
 export type StockAdjustmentInput = z.input<typeof StockAdjustmentSchema>;
@@ -21,7 +21,11 @@ export type StockAdjustmentInput = z.input<typeof StockAdjustmentSchema>;
  */
 export async function createStockAdjustmentAction(input: StockAdjustmentInput) {
   const validated = StockAdjustmentSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن تنفيذ تسوية لمؤسسة أخرى");
+  }
 
   const movementType =
     validated.adjustment_type === "ADD" ? "ADJUSTMENT_ADD" : "ADJUSTMENT_SUB";
@@ -65,7 +69,7 @@ export async function createStockAdjustmentAction(input: StockAdjustmentInput) {
       unit_cost_allocated: unitCost,
       source_doc_type: "STOCK_ADJUSTMENT",
       source_doc_id: validated.product_id,
-      created_by: validated.created_by,
+      created_by: profile.id,
     })
     .select("id, quantity, movement_at")
     .single();
@@ -77,7 +81,7 @@ export async function createStockAdjustmentAction(input: StockAdjustmentInput) {
   // 4. Audit Log
   await supabase.from("audit_logs").insert({
     organization_id: validated.organization_id,
-    user_id: validated.created_by,
+    user_id: profile.id,
     action: "ADJUST_STOCK",
     entity_name: "stock_movements",
     entity_id: movement.id,
@@ -104,7 +108,7 @@ const StockTransferSchema = z.object({
   product_id: z.string().uuid("الصنف مطلوب"),
   quantity: z.number().positive("الكمية يجب أن تكون أكبر من الصفر"),
   reason: z.string().min(3, "سبب التحويل مطلوب (تحويل هالك لمخزن التوالف، دعم مخزن فرعي)"),
-  created_by: z.string().uuid().optional().default("00000000-0000-0000-0000-000000000000"),
+  created_by: z.string().uuid().optional(),
 });
 
 export type StockTransferInput = z.input<typeof StockTransferSchema>;
@@ -118,7 +122,11 @@ export async function transferStockAction(input: StockTransferInput) {
     throw new Error("لا يمكن التحويل لنفس المخزن المصدر");
   }
 
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
+
+  if (validated.organization_id !== profile.organization_id) {
+    throw new Error("لا يمكن تنفيذ تحويل لمؤسسة أخرى");
+  }
 
   // 1. Verify source stock
   const { data: movements } = await supabase
@@ -145,7 +153,7 @@ export async function transferStockAction(input: StockTransferInput) {
     quantity: -validated.quantity,
     source_doc_type: "STOCK_TRANSFER",
     source_doc_id: transferDocId,
-    created_by: validated.created_by,
+    created_by: profile.id,
   });
 
   if (outErr) throw new Error(`فشل قيد التحويل الصادر: ${outErr.message}`);
@@ -158,7 +166,7 @@ export async function transferStockAction(input: StockTransferInput) {
     quantity: validated.quantity,
     source_doc_type: "STOCK_TRANSFER",
     source_doc_id: transferDocId,
-    created_by: validated.created_by,
+    created_by: profile.id,
   });
 
   if (inErr) throw new Error(`فشل قيد التحويل الوارد: ${inErr.message}`);

@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
 import { revalidatePath } from "next/cache";
 
 const DeliveryLineSchema = z.object({
@@ -23,7 +23,7 @@ export type CreateDeliveryOrderInput = z.input<typeof CreateDeliveryOrderSchema>
 
 export async function createDeliveryOrder(input: CreateDeliveryOrderInput) {
   const validated = CreateDeliveryOrderSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile } = await getAuthenticatedProfile();
 
   const { data, error } = await supabase.rpc("rpc_create_delivery_order", {
     p_invoice_id: validated.sales_invoice_id,
@@ -54,7 +54,7 @@ export type UpdateDeliveryStatusInput = z.input<typeof UpdateDeliveryStatusSchem
 
 export async function updateDeliveryStatus(input: UpdateDeliveryStatusInput) {
   const validated = UpdateDeliveryStatusSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase } = await getAuthenticatedProfile();
 
   const { data, error } = await supabase.rpc("rpc_update_delivery_status", {
     p_delivery_id: validated.delivery_id,

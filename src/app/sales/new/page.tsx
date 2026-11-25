@@ -234,10 +234,7 @@ export default function NewSalesInvoicePage() {
       });
 
       if (shouldApprove && result.invoiceId) {
-        await approveSalesInvoice(
-          result.invoiceId,
-          "00000000-0000-0000-0000-000000000000"
-        );
+        await approveSalesInvoice(result.invoiceId);
         alert(`تم إنشاء واعتماد الفاتورة بنجاح برقم (${result.invoiceNumber}). تم خصم المخزون وقفل التكلفة التاريخية.`);
       } else {
         alert(`تم حفظ مسودة الفاتورة بنجاح برقم (${result.invoiceNumber}).`);

@@ -139,7 +139,7 @@ export default function SalesPage() {
 
     setApprovingId(invoice.id);
     try {
-      await approveSalesInvoice(invoice.id, "00000000-0000-0000-0000-000000000000");
+      await approveSalesInvoice(invoice.id);
 
       setInvoices((prev) =>
         prev.map((i) => (i.id === invoice.id ? { ...i, status: "APPROVED" } : i))

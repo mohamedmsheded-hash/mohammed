@@ -1,7 +1,8 @@
 "use server";
 
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedProfile } from "@/lib/supabase/auth";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
 const CreateUserSchema = z.object({
@@ -18,51 +19,28 @@ export type CreateUserInput = z.input<typeof CreateUserSchema>;
 
 export async function createUserProfile(input: CreateUserInput) {
   const validated = CreateUserSchema.parse(input);
-  const supabase = await createClient();
+  const { supabase, profile: actingProfile } = await getAuthenticatedProfile();
 
-  // Create profile (mocking auth user id for demo/seed scenarios)
-  const fakeUserId = crypto.randomUUID();
-
-  const { data: profile, error: profErr } = await supabase
-    .from("profiles")
-    .insert({
-      id: fakeUserId,
-      organization_id: validated.organization_id,
-      branch_id: validated.branch_id || null,
-      full_name: validated.full_name,
-      phone: validated.phone,
-      role_code: validated.role_code,
-      max_discount_pct: validated.max_discount_pct,
-      is_active: true,
-    })
-    .select()
-    .single();
-
-  if (profErr) {
-    throw new Error(`فشل إنشاء المستخدم: ${profErr.message}`);
+  if (validated.organization_id !== actingProfile.organization_id) {
+    throw new Error("لا يمكن إنشاء موظف لمؤسسة أخرى");
   }
 
-  // Assign warehouse access if warehouse keeper or restricted
-  if (validated.warehouse_ids.length > 0) {
-    const warehouseAccessRows = validated.warehouse_ids.map((whId) => ({
-      user_id: fakeUserId,
-      warehouse_id: whId,
-      can_issue: true,
-      can_receive: true,
-    }));
-
-    await supabase.from("user_warehouse_access").insert(warehouseAccessRows);
+  if (actingProfile.role_code !== "ADMIN") {
+    throw new Error("صلاحيات المدير العام مطلوبة لإنشاء الموظفين");
   }
 
-  revalidatePath("/users");
-  return profile;
+  throw new Error("إنشاء حساب موظف يتطلب البريد وكلمة المرور. استخدم إنشاء مستخدم Supabase Auth ثم اربطه بملف الموظف");
 }
 
 export async function updateUserWarehouseAccess(
   userId: string,
   warehouseIds: string[]
 ) {
-  const supabase = await createClient();
+  const { supabase, profile: actingProfile } = await getAuthenticatedProfile();
+
+  if (actingProfile.role_code !== "ADMIN") {
+    throw new Error("صلاحيات المدير العام مطلوبة لتعديل صلاحيات المخازن");
+  }
 
   // Remove existing
   await supabase.from("user_warehouse_access").delete().eq("user_id", userId);
