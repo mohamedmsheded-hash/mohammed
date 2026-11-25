@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -20,6 +20,7 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { createSalesInvoiceDraft, approveSalesInvoice } from "@/server/actions/sales";
+import { createClient } from "@/lib/supabase/client";
 
 interface ProductOption {
   id: string;
@@ -29,41 +30,6 @@ interface ProductOption {
   unitId: string;
   defaultPrice: number;
 }
-
-const availableProducts: ProductOption[] = [
-  {
-    id: "p0000000-0000-0000-0000-000000000001",
-    code: "PRD-CEM-SWD",
-    name: "أسمنت السويدي مقاوم 42.5 (شيكارة 50 كجم)",
-    unit: "شيكارة",
-    unitId: "u0000000-0000-0000-0000-000000000002",
-    defaultPrice: 145.0,
-  },
-  {
-    id: "p0000000-0000-0000-0000-000000000002",
-    code: "PRD-STL-EZZ-10",
-    name: "حديد تسليح عز 10 مم مشرشر أطوال",
-    unit: "طن",
-    unitId: "u0000000-0000-0000-0000-000000000001",
-    defaultPrice: 42500.0,
-  },
-  {
-    id: "p0000000-0000-0000-0000-000000000003",
-    code: "PRD-STL-EZZ-12",
-    name: "حديد تسليح عز 12 مم مشرشر أطوال",
-    unit: "طن",
-    unitId: "u0000000-0000-0000-0000-000000000001",
-    defaultPrice: 42300.0,
-  },
-  {
-    id: "p0000000-0000-0000-0000-000000000004",
-    code: "PRD-AGG-SND-01",
-    name: "رمل محاجر حرش مغسول",
-    unit: "متر مكعب",
-    unitId: "u0000000-0000-0000-0000-000000000003",
-    defaultPrice: 180.0,
-  },
-];
 
 interface FormLineItem {
   key: string;
@@ -76,23 +42,24 @@ interface FormLineItem {
   total: number;
 }
 
-const availableCustomers = [
-  {
-    id: "cust0000-0000-0000-0000-000000000001",
-    name: "شركة المعمار الحديث للمقاولات",
-    phone: "01011223344",
-    nationalId: "29803120123456",
-  },
-  {
-    id: "cust0000-0000-0000-0000-000000000002",
-    name: "مقاولات الشرق (المهندس عادل)",
-    phone: "01122334455",
-    nationalId: "29007152104567",
-  },
-];
+interface CustomerOption {
+  id: string;
+  name: string;
+  phone: string;
+  nationalId: string;
+}
+
+interface WarehouseOption {
+  id: string;
+  name: string;
+}
+
 
 export default function NewSalesInvoicePage() {
   const router = useRouter();
+  const [availableProducts, setAvailableProducts] = useState<ProductOption[]>([]);
+  const [availableCustomers, setAvailableCustomers] = useState<CustomerOption[]>([]);
+  const [availableWarehouses, setAvailableWarehouses] = useState<WarehouseOption[]>([]);
   const [warehouseId, setWarehouseId] = useState("c0000000-0000-0000-0000-000000000001");
   const [customerId, setCustomerId] = useState("");
   const [customerSearchTerm, setCustomerSearchTerm] = useState("");
@@ -104,18 +71,55 @@ export default function NewSalesInvoicePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Line items
-  const [lines, setLines] = useState<FormLineItem[]>([
-    {
-      key: "line-1",
-      productId: availableProducts[0].id,
-      quantity: 50,
-      unit: availableProducts[0].unit,
-      unitId: availableProducts[0].unitId,
-      unitPrice: availableProducts[0].defaultPrice,
-      discount: 0,
-      total: 50 * availableProducts[0].defaultPrice,
-    },
-  ]);
+  const [lines, setLines] = useState<FormLineItem[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const loadOptions = async () => {
+      const [{ data: warehouses }, { data: customers }, { data: products }, { data: units }] = await Promise.all([
+        supabase.from("warehouses").select("id,name_ar").eq("is_active", true).order("name_ar"),
+        supabase.from("customers").select("id,name_ar,phone,national_id").eq("is_active", true).order("name_ar"),
+        supabase.from("products").select("id,code,name_ar,base_unit_id,current_sale_price").eq("is_active", true).order("name_ar"),
+        supabase.from("units").select("id,name_ar").order("name_ar"),
+      ]);
+
+      const unitNames = new Map((units || []).map((unit) => [unit.id, unit.name_ar]));
+      const productOptions = (products || []).map((product) => ({
+        id: product.id,
+        code: product.code,
+        name: product.name_ar,
+        unit: unitNames.get(product.base_unit_id) || "",
+        unitId: product.base_unit_id,
+        defaultPrice: Number(product.current_sale_price || 0),
+      }));
+
+      setAvailableWarehouses((warehouses || []).map((warehouse) => ({ id: warehouse.id, name: warehouse.name_ar })));
+      setAvailableCustomers((customers || []).map((customer) => ({
+        id: customer.id,
+        name: customer.name_ar,
+        phone: customer.phone,
+        nationalId: customer.national_id || "",
+      })));
+      setAvailableProducts(productOptions);
+
+      if (warehouses?.[0]) setWarehouseId(warehouses[0].id);
+      if (productOptions[0]) {
+        setLines([{ 
+          key: "line-1",
+          productId: productOptions[0].id,
+          quantity: 1,
+          unit: productOptions[0].unit,
+          unitId: productOptions[0].unitId,
+          unitPrice: productOptions[0].defaultPrice,
+          discount: 0,
+          total: productOptions[0].defaultPrice,
+        }]);
+      }
+    };
+
+    void loadOptions();
+  }, []);
 
   // Calculations
   const subtotal = lines.reduce((sum, line) => sum + line.total, 0);
@@ -308,12 +312,9 @@ export default function NewSalesInvoicePage() {
                   onChange={(e) => setWarehouseId(e.target.value)}
                   className="w-full bg-[#f8fafc] border border-border rounded-element p-2 text-xs font-bold text-foreground outline-none focus:border-brand"
                 >
-                  <option value="c0000000-0000-0000-0000-000000000001">
-                    مخزن الأسمنت والجبس المغطى
-                  </option>
-                  <option value="c0000000-0000-0000-0000-000000000002">
-                    ساحة تشوين حديد التسليح
-                  </option>
+                  {availableWarehouses.map((warehouse) => (
+                    <option key={warehouse.id} value={warehouse.id}>{warehouse.name}</option>
+                  ))}
                 </select>
               </div>
 

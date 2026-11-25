@@ -138,7 +138,7 @@ export async function createSalesInvoiceDraft(input: CreateSalesInvoiceInput) {
 export async function approveSalesInvoice(invoiceId: string) {
   const { supabase, profile } = await getAuthenticatedProfile();
 
-  const { data, error } = await supabase.rpc("rpc_approve_sales_invoice", {
+  const { data, error } = await supabase.rpc("rpc_approve_sales_invoice_secure", {
     p_invoice_id: invoiceId,
     p_approved_by: profile.id,
   });

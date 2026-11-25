@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Receipt,
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { approveSalesInvoice } from "@/server/actions/sales";
+import { createClient } from "@/lib/supabase/client";
 
 interface InvoiceRow {
   id: string;
@@ -112,10 +113,46 @@ const initialInvoices: InvoiceRow[] = [
 ];
 
 export default function SalesPage() {
-  const [invoices, setInvoices] = useState<InvoiceRow[]>(initialInvoices);
+  const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [activeFilter, setActiveFilter] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const loadInvoices = async () => {
+      const { data, error } = await supabase
+        .from("sales_invoices")
+        .select("id, invoice_number, invoice_date, status, payment_type, subtotal, discount_amount, freight_charge, total_amount, paid_amount, remaining_balance, customers(name_ar), warehouses(name_ar)")
+        .order("invoice_date", { ascending: false });
+
+      if (error) {
+        alert(`فشل تحميل فواتير المبيعات: ${error.message}`);
+        return;
+      }
+
+      setInvoices((data || []).map((invoice: any) => ({
+        id: invoice.id,
+        invoice_number: invoice.invoice_number,
+        customer_name: invoice.customers?.name_ar || "عميل نقدي عام",
+        invoice_date: invoice.invoice_date,
+        warehouse_name: invoice.warehouses?.name_ar || "-",
+        subtotal: Number(invoice.subtotal || 0),
+        discount_amount: Number(invoice.discount_amount || 0),
+        freight_charge: Number(invoice.freight_charge || 0),
+        total_amount: Number(invoice.total_amount || 0),
+        paid_amount: Number(invoice.paid_amount || 0),
+        remaining_balance: Number(invoice.remaining_balance || 0),
+        payment_type: invoice.payment_type,
+        status: invoice.status,
+        historical_cogs: 0,
+        historical_profit: 0,
+      })));
+    };
+
+    void loadInvoices();
+  }, []);
 
   const filteredInvoices = invoices.filter((inv) => {
     const matchesFilter =
