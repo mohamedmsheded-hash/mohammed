@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "مخازن | نظام إدارة وتجارة مواد البناء",
+  title: "شركه شديد",
   description: "نظام شامل ومتكامل لإدارة مخازن مواد البناء، المبيعات، المشتريات، وتكلفة المخزون والحسابات",
 };
 

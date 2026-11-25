@@ -37,7 +37,7 @@ export class ExcelEngine {
    */
   static async generateProductsTemplate(): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
-    workbook.creator = "نظام مخازن ERP";
+    workbook.creator = "شركه شديد";
     workbook.created = new Date();
 
     const sheet = workbook.addWorksheet("دليل الأصناف", {

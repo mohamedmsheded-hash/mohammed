@@ -34,8 +34,8 @@ export default function LoginPage() {
     <main className="min-h-screen bg-[#f7f8fa] flex items-center justify-center p-4" dir="rtl">
       <form onSubmit={handleLogin} className="w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-5">
         <div>
-          <h1 className="text-xl font-extrabold text-gray-900">تسجيل دخول النظام</h1>
-          <p className="text-sm text-gray-500 mt-1">أدخل حساب الموظف المعتمد في Supabase.</p>
+          <h1 className="text-xl font-extrabold text-gray-900">شركه شديد</h1>
+          <p className="text-sm text-gray-500 mt-1">تسجيل دخول الموظفين المعتمدين.</p>
         </div>
 
         {error && (

@@ -86,10 +86,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
           <div>
             <strong className="text-base tracking-wide block font-extrabold text-white">
-              مخازن ERP
+              شركه شديد
             </strong>
             <small className="text-[#9eacbe] text-[10px] block">
-              نظام تجارة مواد البناء
+              نظام إدارة تجارة مواد البناء
             </small>
           </div>
         </div>
